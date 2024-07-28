@@ -179,8 +179,16 @@ ChainRulesCore.@scalar_rule SLEEFPirates.sincos(x) @setup((sinx, cosx) = Ω) cos
     return (ForwardDiff.Dual{T}(sd, cd * ForwardDiff.partials(d)), ForwardDiff.Dual{T}(cd, -sd * ForwardDiff.partials(d)))
 end
 
+ChainRulesCore.@scalar_rule SLEEFPirates.sincos_fast(x) @setup((sinx, cosx) = Ω) cosx -sinx
+
+@inline function SLEEFPirates.sincos_fast(d::ForwardDiff.Dual{T}) where {T}
+    sd, cd = SLEEFPirates.sincos_fast(ForwardDiff.value(d))
+    return (ForwardDiff.Dual{T}(sd, cd * ForwardDiff.partials(d)), ForwardDiff.Dual{T}(cd, -sd * ForwardDiff.partials(d)))
+end
+
 # exponents
 ChainRulesCore.@scalar_rule SLEEFPirates.cbrt(x) inv(3 * Ω^2)
+ChainRulesCore.@scalar_rule SLEEFPirates.cbrt_fast(x) inv(3 * Ω^2)
 ChainRulesCore.@scalar_rule SLEEFPirates.exp(x) Ω
 ChainRulesCore.@scalar_rule SLEEFPirates.exp10(x) logten * Ω
 ChainRulesCore.@scalar_rule SLEEFPirates.exp2(x) logtwo * Ω
@@ -195,6 +203,7 @@ ChainRulesCore.@scalar_rule SLEEFPirates.log2(x) inv(logtwo * x)
 ChainRulesCore.@scalar_rule SLEEFPirates.log2_fast(x) inv(logtwo * x)
 
 DiffRules.@define_diffrule SLEEFPirates.cbrt(x) = :(inv(3 * SLEEFPirates.cbrt($x)^2))
+DiffRules.@define_diffrule SLEEFPirates.cbrt_fast(x) = :(inv(3 * SLEEFPirates.cbrt_fast($x)^2))
 DiffRules.@define_diffrule SLEEFPirates.exp(x) = :(SLEEFPirates.exp($x))
 DiffRules.@define_diffrule SLEEFPirates.exp10(x) = :($logten * SLEEFPirates.exp10($x))
 DiffRules.@define_diffrule SLEEFPirates.exp2(x) = :($logtwo * SLEEFPirates.exp2($x))
@@ -209,6 +218,7 @@ DiffRules.@define_diffrule SLEEFPirates.log2(x) = :(inv($logtwo * $x))
 DiffRules.@define_diffrule SLEEFPirates.log2_fast(x) = :(inv($logtwo * $x))
 
 eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :cbrt))
+eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :cbrt_fast))
 eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :exp))
 eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :exp10))
 eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :exp2))
