@@ -11,6 +11,7 @@ ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 IrrationalConstants = "92d709cd-6900-40b7-9082-c6be49f344b6"
 RealDot = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
 SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 julia = "1.6.7"

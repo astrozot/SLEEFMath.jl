@@ -89,8 +89,8 @@ eval(ForwardDiff.unary_dual_definition(:SLEEFPirates, :tan_fast))
 # cosh
 function ChainRulesCore.rrule(::typeof(SLEEFPirates.cosh), x::Number)
     sinhx, coshx = SLEEFPirates.sincosh(x)
-    cos_pullback(Δy) = (ChainRulesCore.NoTangent(), sinhx' * Δy)
-    return (coshx, cos_pullback)
+    cosh_pullback(Δy) = (ChainRulesCore.NoTangent(), sinhx' * Δy)
+    return (coshx, cosh_pullback)
 end
 
 function ChainRulesCore.frule((_, Δx), ::typeof(SLEEFPirates.cosh), x::Number)
@@ -106,8 +106,8 @@ end
 # sinh
 function ChainRulesCore.rrule(::typeof(SLEEFPirates.sinh), x::Number)
     sinhx, coshx = SLEEFPirates.sincosh(x)
-    sin_pullback(Δy) = (ChainRulesCore.NoTangent(), coshx' * Δy)
-    return (sinhx, cos_pullback)
+    sinh_pullback(Δy) = (ChainRulesCore.NoTangent(), coshx' * Δy)
+    return (sinhx, sinh_pullback)
 end
 
 function ChainRulesCore.frule((_, Δx), ::typeof(SLEEFPirates.sinh), x::Number)
