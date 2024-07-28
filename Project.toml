@@ -1,0 +1,13 @@
+name = "SLEEFMath"
+uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
+authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
+version = "1.0.0"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
