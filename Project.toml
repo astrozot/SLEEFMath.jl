@@ -3,6 +3,14 @@ uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
 authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
 version = "1.0.0"
 
+[deps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+IrrationalConstants = "92d709cd-6900-40b7-9082-c6be49f344b6"
+RealDot = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
+SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
+
 [compat]
 julia = "1.6.7"
 
