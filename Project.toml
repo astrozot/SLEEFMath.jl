@@ -13,7 +13,7 @@ SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
 [compat]
 julia = "1.6.7"
 ChainRulesCore = "1.24.0"
-DiffRules = "1.51.0"
+DiffRules = "1.15.0"
 IrrationalConstants = "0.2.2"
 RealDot = "0.1.0"
 SLEEFPirates = "0.6.43"
