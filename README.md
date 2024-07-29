@@ -36,13 +36,13 @@ julia> xs = rand(10^6); ys = similar(xs);
 
 julia> using BenchmarkTools, FastBroadcast
 
-julia> @btime @.. \$ys = @sleefmath exp(sin(\$xs));
+julia> @btime @.. $ys = @sleefmath exp(sin($xs));
   3.708 ms (0 allocations: 0 bytes)
 
-julia> @btime @.. \$ys = exp(sin(\$xs));
+julia> @btime @.. $ys = exp(sin($xs));
   10.265 ms (0 allocations: 0 bytes)
 
-julia> @btime (@simd ivdep for n ∈ eachindex(\$xs); @inbounds \$ys[n] = @sleefmath exp(sin(\$xs[n])); end);
+julia> @btime (@simd ivdep for n ∈ eachindex($xs); @inbounds $ys[n] = @sleefmath exp(sin($xs[n])); end);
   3.719 ms (0 allocations: 0 bytes)
 ```
 
