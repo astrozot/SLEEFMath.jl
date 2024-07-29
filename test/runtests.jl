@@ -1,9 +1,10 @@
-using SLEEFMath
+using SLEEFMath, SLEEFPirates
 using Test
 using Chairmarks
 using ForwardDiff
 import Zygote
-
+import AbstractDifferentiation
+using Diffractor: DiffractorForwardBackend
 @testset "SLEEFMath.jl" verbose=true begin
     @testset "Consistency" begin
         @test (@sleefmath acos(0.31^2.5)) ≈ acos(0.31^2.5)
@@ -18,6 +19,10 @@ import Zygote
         @test (@sleefmath max(min(3.0, 4.0), 5.0)) ≈ max(min(3.0, 4.0), 5.0)
         @test all((@sleefmath sincos(sin(3.0))) .≈ sincos(sin(3.0)))
         @test (@sleefmath sinh(sqrt(3.0))) ≈ sinh(sqrt(3.0))
+        x = y = 1.23
+        a = (@sleefmath x += sin(max(3.0, 4.0)))
+        b = (y += sin(max(3.0, 4.0)))
+        @test a ≈ b
         @test (@sleefmath sum([1,2,3])) == 6
     end
 
@@ -66,6 +71,14 @@ import Zygote
         @test D(x -> (@sleefmath sincos(sin(x)))[1], 32.1) ≈ D(x -> sincos(sin(x))[1], 32.1)
         @test D(x -> (@sleefmath sincos(cos(x)))[2], 32.1) .≈ D(x -> sincos(cos(x))[2], 32.1)
         @test D(x -> (@sleefmath sinh(sqrt(x))), 3.0) ≈ D(x -> sinh(sqrt(x)), 3.0)
+        # non-fast versions
+        @test D(x -> (SLEEFPirates.sin(SLEEFPirates.hypot(x, 2.5))), 4.1) ≈ D(x -> sin(hypot(x, 2.5)), 4.1)
+        @test D(x -> (SLEEFPirates.acos(SLEEFPirates.pow(x, 2.5))), 0.31) ≈ D(x -> acos(x^2.5), 0.31)
+        @test D(x -> (SLEEFPirates.atan(SLEEFPirates.cbrt(x))), 7.3) ≈ D(x -> atan(cbrt(x)), 7.3)
+        @test D(x -> (SLEEFPirates.expm1(SLEEFPirates.tan(x))), 3.0) ≈ D(x -> expm1(tan(x)), 3.0)
+        @test D(x -> (SLEEFPirates.log10(SLEEFPirates.log(SLEEFPirates.cos(x) + 10))), 3.0) ≈ D(x -> log10(log(cos(x) + 10)), 3.0)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[1], 32.1) ≈ D(x -> sincos(log2(x))[1], 32.1)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[2], 32.1) ≈ D(x -> sincos(log2(x))[2], 32.1)
     end
 
     @testset "Zygote" begin
@@ -84,6 +97,38 @@ import Zygote
         @test D(x -> (@sleefmath sincos(sin(x)))[1], 32.1) ≈ D(x -> sincos(sin(x))[1], 32.1)
         @test D(x -> (@sleefmath sincos(cos(x)))[2], 32.1) .≈ D(x -> sincos(cos(x))[2], 32.1)
         @test D(x -> (@sleefmath sinh(sqrt(x))), 3.0) ≈ D(x -> sinh(sqrt(x)), 3.0)
+        # non-fast versions
+        @test_broken D(x -> (SLEEFPirates.acos(SLEEFPirates.pow(x, 2.5))), 0.31) ≈ D(x -> acos(x^2.5), 0.31)
+        @test D(x -> (SLEEFPirates.atan(SLEEFPirates.cbrt(x))), 7.3) ≈ D(x -> atan(cbrt(x)), 7.3)
+        @test D(x -> (SLEEFPirates.expm1(SLEEFPirates.tan(x))), 3.0) ≈ D(x -> expm1(tan(x)), 3.0)
+        @test D(x -> (SLEEFPirates.log10(SLEEFPirates.log(SLEEFPirates.cos(x) + 10))), 3.0) ≈ D(x -> log10(log(cos(x) + 10)), 3.0)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[1], 32.1) ≈ D(x -> sincos(log2(x))[1], 32.1)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[2], 32.1) ≈ D(x -> sincos(log2(x))[2], 32.1)
+    end
+
+    @testset "Diffractor" begin
+        D = (f, x) -> AbstractDifferentiation.derivative(DiffractorForwardBackend(), f, x)[1]
+        @test D(x -> (@sleefmath acos(x^2.5)), 0.31) ≈ D(x -> acos(x^2.5), 0.31)
+        @test D(x -> (@sleefmath asinh(cbrt(x))), 7.3) ≈ D(x -> asinh(cbrt(x)), 7.3)
+        @test D(x -> (@sleefmath atan(atanh(asinh(x)))), 0.5) ≈ D(x -> atan(atanh(asinh(x))), 0.5)
+        @test_broken D(x -> (@sleefmath exp(cos(x))), 3.0) ≈ D(x -> exp(cos(x)), 3.0)
+        @test D(x -> (@sleefmath exp10(cosh(x))), 3.0) ≈ D(x -> exp10(cosh(x)), 3.0)
+        @test D(x -> (@sleefmath exp2(sinh(x))), 3.0) ≈ D(x -> exp2(sinh(x)), 3.0)
+        @test D(x -> (@sleefmath expm1(tan(x))), 3.0) ≈ D(x -> expm1(tan(x)), 3.0)
+        @test D(x -> (@sleefmath log10(log(hypot(x, 4.0)))), 3.0) ≈ D(x -> log10(log(hypot(x, 4.0))), 3.0)
+        @test D(x -> (@sleefmath log10(log(hypot(3.0, x)))), 4.0) ≈ D(x -> log10(log(hypot(3.0, x))), 4.0)
+        @test D(x -> (@sleefmath log10(log(hypot(x, x^2)))), 2.0) ≈ D(x -> log10(log(hypot(x, x^2))), 2.0)
+        @test D(x -> (@sleefmath log1p(log2(x))), 7.9) ≈ D(x -> log1p(log2(x)), 7.9)
+        @test D(x -> (@sleefmath sincos(sin(x)))[1], 32.1) ≈ D(x -> sincos(sin(x))[1], 32.1)
+        @test_broken D(x -> (@sleefmath sincos(cos(x)))[2], 32.1) .≈ D(x -> sincos(cos(x))[2], 32.1)
+        @test D(x -> (@sleefmath sinh(sqrt(x))), 3.0) ≈ D(x -> sinh(sqrt(x)), 3.0)
+        # non-fast versions
+        @test_broken D(x -> (SLEEFPirates.acos(SLEEFPirates.pow(x, 2.5))), 0.31) ≈ D(x -> acos(x^2.5), 0.31)
+        @test D(x -> (SLEEFPirates.atan(SLEEFPirates.cbrt(x))), 7.3) ≈ D(x -> atan(cbrt(x)), 7.3)
+        @test D(x -> (SLEEFPirates.expm1(SLEEFPirates.tan(x))), 3.0) ≈ D(x -> expm1(tan(x)), 3.0)
+        @test_broken D(x -> (SLEEFPirates.log10(SLEEFPirates.log(SLEEFPirates.cos(x) + 10))), 3.0) ≈ D(x -> log10(log(cos(x) + 10)), 3.0)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[1], 32.1) ≈ D(x -> sincos(log2(x))[1], 32.1)
+        @test D(x -> (SLEEFPirates.sincos(SLEEFPirates.log2(x)))[2], 32.1) ≈ D(x -> sincos(log2(x))[2], 32.1)
     end
 
 end;
