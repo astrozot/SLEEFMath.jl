@@ -1,7 +1,7 @@
 name = "SLEEFMath"
 uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
 authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
