@@ -1,6 +1,6 @@
 name = "SLEEFMath"
 uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
-version = "1.0.3"
+version = "1.0.2"
 authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
 
 [deps]
