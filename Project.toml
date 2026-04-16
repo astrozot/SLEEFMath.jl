@@ -1,7 +1,7 @@
 name = "SLEEFMath"
 uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
+version = "1.0.3"
 authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
-version = "1.0.2"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
@@ -12,7 +12,12 @@ RealDot = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
 SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
 
 [compat]
-julia = "1.6.7"
+ChainRulesCore = "1.0.0"
+DiffRules = "1.0.0"
+ForwardDiff = "0.1.0,1.0.0"
+IrrationalConstants = "0.2.0"
+SLEEFPirates = "0.6.0"
+julia = "1.6.0"
 
 [extras]
 AbstractDifferentiation = "c29ec348-61ec-40c8-8164-b8c60e9d9f3d"
