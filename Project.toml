@@ -16,6 +16,7 @@ ChainRulesCore = "1.0.0"
 DiffRules = "1.0.0"
 ForwardDiff = "0.1.0,1.0.0"
 IrrationalConstants = "0.2.0"
+RealDot = "0.1.0"
 SLEEFPirates = "0.6.0"
 julia = "1.6.0"
 
