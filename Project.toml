@@ -1,6 +1,6 @@
 name = "SLEEFMath"
 uuid = "5f1e1ae2-5dfd-4ed6-a67a-be13e387a3fa"
-version = "1.0.2"
+version = "1.1.0"
 authors = ["Marco Lombardi <marco.lombardi@gmail.com>"]
 
 [deps]
@@ -14,18 +14,16 @@ SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
 [compat]
 ChainRulesCore = "1.0.0"
 DiffRules = "1.0.0"
-ForwardDiff = "0.1.0,1.0.0"
+ForwardDiff = "0.10, 1"
 IrrationalConstants = "0.2.0"
 RealDot = "0.1.0"
 SLEEFPirates = "0.6.0"
 julia = "1.6.0"
 
 [extras]
-AbstractDifferentiation = "c29ec348-61ec-40c8-8164-b8c60e9d9f3d"
 Chairmarks = "0ca39b1e-fe0b-4e98-acfc-b1656634c4de"
-Diffractor = "9f5e2b26-1114-432f-b630-d3fe2085c51c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["AbstractDifferentiation", "Chairmarks", "Diffractor", "Test", "Zygote"]
+test = ["Chairmarks", "Test", "Zygote"]

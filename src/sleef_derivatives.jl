@@ -240,11 +240,11 @@ function ChainRulesCore.frule((_, Δx, Δy), ::typeof(SLEEFPirates.hypot), x::T,
     return Ω, ∂Ω
 end
 
-function rrule(::typeof(SLEEFPirates.hypot), x::T, y::T) where {T<:Union{Real,Complex}}
+function ChainRulesCore.rrule(::typeof(SLEEFPirates.hypot), x::T, y::T) where {T<:Union{Real,Complex}}
     Ω = SLEEFPirates.hypot(x, y)
     function hypot_pullback(ΔΩ)
         c = real(ΔΩ) / ifelse(iszero(Ω), one(Ω), Ω)
-        return (NoTangent(), c * x, c * y)
+        return (ChainRulesCore.NoTangent(), c * x, c * y)
     end
     return (Ω, hypot_pullback)
 end
@@ -256,8 +256,10 @@ eval(ForwardDiff.binary_dual_definition(:SLEEFPirates, :hypot))
 # pow
 DiffRules.@define_diffrule SLEEFPirates.pow(x, y) = :($y * SLEEFPirates.pow($x, ($y - 1))), :(SLEEFPirates.pow($x, $y) * SLEEFPirates.log($x))
 DiffRules.@define_diffrule SLEEFPirates.pow_fast(x, y) = :($y * SLEEFPirates.pow_fast($x, ($y - 1))), :(SLEEFPirates.pow_fast($x, $y) * SLEEFPirates.log_fast($x))
+DiffRules.@define_diffrule SLEEFMath.pow_fast(x, y) = :($y * SLEEFMath.pow_fast($x, ($y - 1))), :(SLEEFMath.pow_fast($x, $y) * SLEEFMath.SLEEFPirates.log_fast($x))
 
-for (f,g) in ((:(SLEEFPirates.pow), :(SLEEFPirates.log)), (:(SLEEFPirates.pow_fast), :(SLEEFPirates.log_fast)))
+for (f,g) in ((:(SLEEFPirates.pow), :(SLEEFPirates.log)), (:(SLEEFPirates.pow_fast), :(SLEEFPirates.log_fast)),
+              (:(SLEEFMath.pow_fast), :(SLEEFPirates.log_fast)))
     @eval begin
         ForwardDiff.@define_binary_dual_op(
             $f,
@@ -294,3 +296,27 @@ for (f,g) in ((:(SLEEFPirates.pow), :(SLEEFPirates.log)), (:(SLEEFPirates.pow_fa
         )
     end
 end
+
+# SLEEFMath.pow_fast (see pow.jl); the ∂y rule follows the ForwardDiff one above
+function ChainRulesCore.frule((_, Δx, Δy), ::typeof(pow_fast), x::SLEEFFloat, y::Union{SLEEFFloat,Integer})
+    Ω = pow_fast(x, y)
+    ∂x = y * pow_fast(x, y - 1)
+    ∂y = ifelse(iszero(x) & (y > 0), zero(Ω), Ω * SLEEFPirates.log_fast(x))
+    return Ω, ∂x * Δx + (y isa Integer ? zero(Ω) : ∂y * Δy)
+end
+
+function ChainRulesCore.rrule(::typeof(pow_fast), x::SLEEFFloat, y::Union{SLEEFFloat,Integer})
+    Ω = pow_fast(x, y)
+    project_x, project_y = ChainRulesCore.ProjectTo(x), ChainRulesCore.ProjectTo(y)
+    function pow_fast_pullback(ΔΩ)
+        ∂x = y * pow_fast(x, y - 1)
+        ∂y = ifelse(iszero(x) & (y > 0), zero(Ω), Ω * SLEEFPirates.log_fast(x))
+        return (ChainRulesCore.NoTangent(), project_x(ΔΩ * ∂x), project_y(ΔΩ * ∂y))
+    end
+    return Ω, pow_fast_pullback
+end
+
+# DiffRules keeps its rules in a Dict owned by DiffRules, so the entries added above
+# while this package precompiles are lost when it is loaded: keep a copy here and
+# re-register it in __init__
+const sleef_diffrules = filter(((k, _),) -> k[1] in (:SLEEFPirates, :SLEEFMath), DiffRules.DEFINED_DIFFRULES)

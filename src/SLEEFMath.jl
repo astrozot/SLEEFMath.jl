@@ -1,9 +1,12 @@
 module SLEEFMath
 
 import SLEEFPirates
+include("pow.jl")
 include("sleef_derivatives.jl")
 
 export @sleefmath
+
+__init__() = merge!(DiffRules.DEFINED_DIFFRULES, sleef_diffrules)
 
 const math_fast_op =
     Dict(# basic arithmetic
@@ -24,12 +27,9 @@ const math_fast_op =
          :inv => :inv_fast,
          :rem => :rem_fast,
          :sign => :sign_fast,
-         :isfinite => :isfinite_fast,
-         :isinf => :isinf_fast,
-         :isnan => :isnan_fast,
-         :issubnormal => :issubnormal_fast,
-         # math functions
-         :^ => :pow_fast,
+         # isfinite, isinf, isnan, issubnormal are deliberately omitted: their
+         # Base.FastMath versions return constants (e.g. isnan_fast(NaN) == false)
+         # math functions (:^ is handled by sleefmath_op)
          :acos => :acos_fast,
          :acosh => :acosh_fast,
          :angle => :angle_fast,
@@ -67,7 +67,6 @@ const math_fast_op =
 
 const sleef_fast_op =
     Dict(# math functions
-        :^ => :pow_fast,
         :acos => :acos_fast,
         :acosh => :acosh,
         :asin => :asin_fast,
@@ -80,7 +79,7 @@ const sleef_fast_op =
         :exp10 => :exp10,
         :exp2 => :exp2,
         :exp => :exp,
-        :expm1 => :expm1_fast,
+        :expm1 => :expm1,
         :hypot => :hypot,
         :log10 => :log10_fast,
         :log1p => :log1p,
@@ -91,6 +90,10 @@ const sleef_fast_op =
         :sinh => :sinh,
         :tan => :tan_fast,
         :tanh => :tanh_fast)
+
+# functions defined in SLEEFMath itself
+const sleefmath_op =
+    Dict(:^ => :pow_fast)
 
 const rewrite_op =
     Dict(:+= => :+,
@@ -124,6 +127,8 @@ function make_sleefmath(expr::Expr)
     Base.exprarray(make_sleefmath(expr.head), Base.mapany(make_sleefmath, expr.args))
 end
 function make_sleefmath(symb::Symbol)
+    own_symb = get(sleefmath_op, symb, :nothing)
+    own_symb === :nothing || return :(SLEEFMath.$own_symb)
     sleef_symb = get(sleef_fast_op, symb, :nothing)
     if sleef_symb === :nothing
         fast_symb = get(math_fast_op, symb, :nothing)
